@@ -42,6 +42,7 @@ namespace TestShite
             public static byte sound_timer;
             public static short[] stack = new short[16]; //16 levels of stack
             public static short sp; //stack pointer to remember where we jumped from
+            public static string romName;
 
             //Chip-8 Memory Map
             //0x000 - 0x01FF : Interpreter
@@ -87,6 +88,7 @@ namespace TestShite
 
             public void LoadROM(string filename)
             {
+                Chip8.romName = filename;
                 StreamReader sr = new StreamReader(filename);
                 for (int i = 0; i < sr.BaseStream.Length; i++)
                 {
@@ -110,7 +112,59 @@ namespace TestShite
                         usedMemory += 1;
                     }
                 }
-                Console.Write("Used system memory: " + usedMemory + "B/4096B\n");
+
+                #region Blackjack and hookers
+                int nibba = 0;
+                int line = 0;
+                string memoryLabel = "|LOADED ROM: " + Chip8.romName + "|-|MEMORY: " + usedMemory + "B/4096B|";
+
+                Console.Write("*");
+                for (int i = 0; i <= ((192) - (memoryLabel.Length));i++)
+                {
+                    Console.Write("-");
+                    if (i == ((192 / 2) - memoryLabel.Length / 2))
+                    {
+                        Console.Write(memoryLabel);
+                    }
+                }
+                Console.Write("*\n| ");
+
+                foreach(byte _byte in Chip8.Memory)
+                {
+                    if (nibba != 63)
+                    {
+                        Console.Write(_byte.ToString("X2") + " ");
+                    }
+                    else if(line == 63)
+                    {
+                        Console.Write(_byte.ToString("X2") + " |\n");
+                        line++;
+                        nibba = -1;
+                    }
+                    else
+                    {
+                        Console.Write(_byte.ToString("X2") + " |\n| ");
+                        line++;
+                        nibba = -1;
+                    }
+                    nibba++;
+                }
+
+                Console.Write("*");
+                for (int i = 0; i < 193; i++)
+                {
+                    Console.Write("-");
+                }
+                Console.WriteLine("*\n");
+
+                Console.Write("REGISTERS: ");
+                foreach(byte register in Chip8.V)
+                {
+                    Console.Write(register.ToString("X2") + " ");
+                }
+                Console.WriteLine();
+                #endregion
+
                 Console.WriteLine("fetched opcode: 0x" + Chip8.opcode.ToString("X2"));
                 //we now need to determine what the opcode is, and what it's supposed to do
                 //ex: 0xA2F0 means to store 0x2F0 into I (0xA000 is therefore the instruction)
@@ -182,7 +236,7 @@ namespace TestShite
                                     Chip8.V[Chip8.opcode & 0x0F] = (byte)temp_int;
                                     Chip8.pc += 2;
                                     break;
-                                case 0x2: // 8xy2 - AND Vx, Vy
+                                /*case 0x2: // 8xy2 - AND Vx, Vy
                                     //Chip8.V[Chip8.opcode & 0x0F] = Chip8
                                     break;
                                 case 0x3: // 8xy3 - XOR Vx, Vy
@@ -196,8 +250,15 @@ namespace TestShite
                                 case 0x7: // SUBN Vx, Vy
                                     break;
                                 case 0xE: // SHL Vx {, Vy}
-                                    break;
+                                    break;*/
                                 default:
+                                    Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
+                                    /*for (int i = 0; i < 5; i++)
+                                    {
+                                        Console.Beep();
+                                    }*/
+                                    //Chip8.pc += 2;
+                                    Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
                                     break;
                             }
                             break;
@@ -205,6 +266,10 @@ namespace TestShite
                     default:
                         //Console.Clear();
                         Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
+                        /*for(int i = 0; i < 5; i++)
+                        {
+                            Console.Beep();
+                        }*/
                         //Chip8.pc += 2;
                         Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
                         break;
@@ -235,7 +300,6 @@ namespace TestShite
             {
                 Console.WriteLine("Please define a ROM file");
                 Console.WriteLine("Usage: sept8.exe <ROM file>");
-                Console.ReadLine();
                 return 1;
             }
 #endif
@@ -248,7 +312,7 @@ namespace TestShite
                     try
                     {
 #if !DEBUG
-                        chip8.LoadROM(args[0]);
+                        sept8.LoadROM(args[0]);
 #endif
 #if DEBUG
                         sept8.LoadROM("BLINKY"); //our test game
