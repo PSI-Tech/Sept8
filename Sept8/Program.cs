@@ -253,10 +253,10 @@ namespace TestShite
                                     break;*/
                                 default:
                                     Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
-                                    /*for (int i = 0; i < 5; i++)
+                                    for (int i = 0; i < 5; i++)
                                     {
                                         Console.Beep();
-                                    }*/
+                                    }
                                     //Chip8.pc += 2;
                                     Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
                                     break;
@@ -266,10 +266,10 @@ namespace TestShite
                     default:
                         //Console.Clear();
                         Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
-                        /*for(int i = 0; i < 5; i++)
+                        for(int i = 0; i < 5; i++)
                         {
                             Console.Beep();
-                        }*/
+                        }
                         //Chip8.pc += 2;
                         Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
                         break;
