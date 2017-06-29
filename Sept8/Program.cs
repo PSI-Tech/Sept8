@@ -116,6 +116,7 @@ namespace TestShite
                 #region Blackjack and hookers
                 int nibba = 0;
                 int line = 0;
+                int index = 0;
                 string memoryLabel = "|LOADED ROM: " + Chip8.romName + "|-|MEMORY: " + usedMemory + "B/4096B|";
 
                 Console.Write("*");
@@ -129,25 +130,64 @@ namespace TestShite
                 }
                 Console.Write("*\n| ");
 
-                foreach(byte _byte in Chip8.Memory)
+                foreach(byte _byte in Chip8.Memory) //with what I'm doing, this should be a for loop at this point, but I'm too lazy to change this right now.
                 {
                     if (nibba != 63)
                     {
-                        Console.Write(_byte.ToString("X2") + " ");
+                        //opcode = (short)(_byte << 8 | Chip8.Memory[index + 1]);
+                        if (Chip8.pc == index || Chip8.pc == index-1)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write(_byte.ToString("X2") + " ");
+                        }
+                        else if (_byte != 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(_byte.ToString("X2") + " ");
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.Write(_byte.ToString("X2") + " ");
+                        }
+                        Console.ResetColor();
                     }
-                    else if(line == 63)
+                    else if (line == 63)
                     {
-                        Console.Write(_byte.ToString("X2") + " |\n");
+                        if (_byte != 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        Console.ResetColor();
+                        Console.Write(" |\n");
                         line++;
                         nibba = -1;
                     }
                     else
                     {
-                        Console.Write(_byte.ToString("X2") + " |\n| ");
+                        if (_byte != 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        Console.ResetColor();
+                        Console.Write(" |\n| ");
                         line++;
                         nibba = -1;
                     }
                     nibba++;
+                    index++;
                 }
 
                 Console.Write("*");
@@ -252,6 +292,7 @@ namespace TestShite
                                 case 0xE: // SHL Vx {, Vy}
                                     break;*/
                                 default:
+                                    Console.ForegroundColor = ConsoleColor.Red;
                                     Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
                                     for (int i = 0; i < 5; i++)
                                     {
@@ -259,12 +300,13 @@ namespace TestShite
                                     }
                                     //Chip8.pc += 2;
                                     Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
+                                    Console.ResetColor();
                                     break;
                             }
                             break;
                         }
                     default:
-                        //Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
                         for(int i = 0; i < 5; i++)
                         {
@@ -272,6 +314,7 @@ namespace TestShite
                         }
                         //Chip8.pc += 2;
                         Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
+                        Console.ResetColor();
                         break;
                 }
                 #endregion
