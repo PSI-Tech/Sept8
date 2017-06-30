@@ -130,7 +130,7 @@ namespace TestShite
                 }
                 Console.Write("*\n| ");
 
-                foreach(byte _byte in Chip8.Memory) //with what I'm doing, this should be a for loop at this point, but I'm too lazy to change this right now.
+                foreach(byte _byte in Chip8.Memory) //with what I'm doing, this should be a for loop at this point, but I'm too lazy to change this right now. This should also be cleaned up or handled in a better manner.
                 {
                     if (nibba != 63)
                     {
@@ -154,7 +154,12 @@ namespace TestShite
                     }
                     else if (line == 63)
                     {
-                        if (_byte != 0)
+                        if (Chip8.pc == index || Chip8.pc == index - 1)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        else if (_byte != 0)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.Write(_byte.ToString("X2"));
@@ -171,7 +176,12 @@ namespace TestShite
                     }
                     else
                     {
-                        if (_byte != 0)
+                        if (Chip8.pc == index || Chip8.pc == index - 1)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write(_byte.ToString("X2"));
+                        }
+                        else if (_byte != 0)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.Write(_byte.ToString("X2"));
@@ -189,7 +199,6 @@ namespace TestShite
                     nibba++;
                     index++;
                 }
-
                 Console.Write("*");
                 for (int i = 0; i < 193; i++)
                 {
@@ -294,12 +303,15 @@ namespace TestShite
                                 default:
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
+                                    Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
                                     for (int i = 0; i < 5; i++)
                                     {
                                         Console.Beep();
                                     }
                                     //Chip8.pc += 2;
-                                    Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
+#if !DEBUG
+                                    throw new NotImplementedException();
+#endif
                                     Console.ResetColor();
                                     break;
                             }
@@ -308,19 +320,22 @@ namespace TestShite
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
-                        for(int i = 0; i < 5; i++)
+                        Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
+                        for (int i = 0; i < 5; i++)
                         {
                             Console.Beep();
                         }
                         //Chip8.pc += 2;
-                        Console.WriteLine("Unimplemented opcode: 0x" + Chip8.opcode.ToString("X2"));
+#if !DEBUG
+                        throw new NotImplementedException();
+#endif
                         Console.ResetColor();
                         break;
                 }
-                #endregion
+#endregion
 
                 //do timer shenanigans stuff that literally does pretty much nothing right now
-                #region Timers
+#region Timers
                 if (Chip8.delay_timer > 0)
                     --Chip8.delay_timer;
 
@@ -331,7 +346,7 @@ namespace TestShite
                     --Chip8.sound_timer;
 
                 }
-                #endregion
+#endregion
             }
         }
 
@@ -369,7 +384,8 @@ namespace TestShite
                     }
                     catch (Exception kek)
                     {
-                        Console.WriteLine("Failed to load rom file: " + kek.Message);
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("EXCEPTION BREAK: " + kek.Message + "\n" + kek.StackTrace + "\nThis is likely an instruction implementation problem, or the ROM could not be loaded. Submit an issue report on http://www.github.com/PSI-Tech/Sept8/issues so we can fix the problem.");
                     }
                 }
             } while (true);
