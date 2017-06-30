@@ -371,9 +371,11 @@ namespace TestShite
                     {
 #if !DEBUG
                         sept8.LoadROM(args[0]);
+                        Console.Title += " " + args[0];
 #endif
 #if DEBUG
                         sept8.LoadROM("BLINKY"); //our test game
+                        Console.Title += " - BLINKY";
 #endif
                         //temporary CPU_Chip8 loop until CPU_Chip8 core is fully implemented
                         do
