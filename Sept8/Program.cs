@@ -388,6 +388,8 @@ namespace TestShite
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("EXCEPTION BREAK: " + kek.Message + "\n" + kek.StackTrace + "\nThis is likely an instruction implementation problem, or the ROM could not be loaded. Submit an issue report on http://www.github.com/PSI-Tech/Sept8/issues so we can fix the problem.");
+                        Console.ResetColor();
+                        return 0;
                     }
                 }
             } while (true);
