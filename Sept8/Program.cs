@@ -101,8 +101,7 @@ namespace TestShite
             public void emulateCycle()
             {
                 #region Opcode fetching and decoding
-                var fetchedopcode = Chip8.Memory[Chip8.pc] << 8 | Chip8.Memory[Chip8.pc + 1];
-                Chip8.opcode = (short)fetchedopcode;
+                Chip8.opcode = (short)(Chip8.Memory[Chip8.pc] << 8 | Chip8.Memory[Chip8.pc + 1]);
                 Console.Clear();
                 int usedMemory = 0;
                 foreach (byte value in Chip8.Memory)
@@ -220,7 +219,6 @@ namespace TestShite
                 Console.WriteLine("decoded opcode: 0x" + (Chip8.opcode >> 12 & 0xF).ToString("X"));
                 #endregion
                 #region CPU_Chip8 core and opcode interpretation
-                int temp_int; //Because C# sucks, maybe there's a better way but idc
                 switch (Chip8.opcode >> 12 & 0xF) //decode opcode, shift 12 bits to the right as first 4 indicate instruction/instruction group
                 {
                     case 0x0:
@@ -240,14 +238,12 @@ namespace TestShite
                             break;
                         }
                     case 0x1: // 1nnn - JP addr
-                        temp_int = Chip8.opcode & 0x0FFF;
-                        Chip8.pc = (short)temp_int;
+                        Chip8.pc = (short)(Chip8.opcode & 0x0FFF);
                         break;
                     case 0x2: //2nnn - CALL addr
-                        temp_int = Chip8.opcode & 0x0FFF;
                         Chip8.stack[Chip8.sp] = Chip8.pc; //set the program counter to the top of the stack.
                         Chip8.sp++;
-                        Chip8.pc = (short)temp_int;
+                        Chip8.pc = (short)(Chip8.opcode & 0x0FFF);
                         break;
                     case 0x3: //3xkk - SE Vx, byte
                         if ((Chip8.V[Chip8.opcode & 0xF00]) == (Chip8.opcode & 0xFF))
@@ -267,10 +263,13 @@ namespace TestShite
                         else
                             Chip8.pc += 2; //Otherwise, proceed.
                         break;
-                    case 0xA: //Annn - LD I, addr
-                        temp_int = Chip8.opcode & 0x0FFF;
-                        Chip8.I = (short)temp_int;
-                        Chip8.pc += 2; // Proceed to next opcode.
+                    case 0x6: //6xkk - LD Vx, byte
+                        Chip8.V[Chip8.opcode & 0x0F] = (byte)(Chip8.opcode & 0xFF);
+                        Chip8.pc += 2;
+                        break;
+                    case 0x7: //7xkk - ADD Vx, byte
+                        Chip8.V[Chip8.opcode & 0x0F] += (byte)(Chip8.opcode & 0xFF);
+                        Chip8.pc += 2;
                         break;
                     case 0x8:
                         {
@@ -281,25 +280,35 @@ namespace TestShite
                                     Chip8.pc += 2;
                                     break;
                                 case 0x1: // 8xy1 - OR Vx, Vy
-                                    temp_int = Chip8.V[Chip8.opcode & 0x0F] ^ Chip8.V[Chip8.opcode & 0x00F];
-                                    Chip8.V[Chip8.opcode & 0x0F] = (byte)temp_int;
+                                    Chip8.V[Chip8.opcode & 0x0F] = (byte)(Chip8.V[Chip8.opcode & 0x0F] ^ Chip8.V[Chip8.opcode & 0x00F]);
                                     Chip8.pc += 2;
                                     break;
-                                /*case 0x2: // 8xy2 - AND Vx, Vy
-                                    //Chip8.V[Chip8.opcode & 0x0F] = Chip8
+                                case 0x2: // 8xy2 - AND Vx, Vy
+                                    Chip8.V[Chip8.opcode & 0x0F] = (byte)(Chip8.V[Chip8.opcode & 0x0F] & Chip8.V[Chip8.opcode & 0x00F]);
+                                    Chip8.pc += 2;
                                     break;
                                 case 0x3: // 8xy3 - XOR Vx, Vy
+                                    Chip8.V[Chip8.opcode & 0x0F] = (byte)(Chip8.V[Chip8.opcode & 0x0F] ^ Chip8.V[Chip8.opcode & 0x00F]);
+                                    Chip8.pc += 2;
                                     break;
                                 case 0x4: // 8xy4 - ADD Vx, Vy
+                                    /*if(Chip8.V[Chip8.opcode & 0x0F] + Chip8.V[Chip8.opcode & 0x00F] > 0xFF)
+                                    {
+                                        Chip8.V[0xF] = 1;
+                                    }
+                                    else
+                                    {
+                                        Chip8.V[0xF] = 0;
+                                    }*/
                                     break;
                                 case 0x5: // 8xy5 - SUB Vx, Vy
                                     break;
-                                case 0x6: // SHR Vx {, Vy}
+                                case 0x6: // SHR Vx {, Vy}otep
                                     break;
                                 case 0x7: // SUBN Vx, Vy
                                     break;
                                 case 0xE: // SHL Vx {, Vy}
-                                    break;*/
+                                    break;
                                 default:
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
@@ -317,6 +326,12 @@ namespace TestShite
                             }
                             break;
                         }
+                    case 0x9:
+                        break;
+                    case 0xA: //Annn - LD I, addr
+                        Chip8.I = (short)(Chip8.opcode & 0x0FFF);
+                        Chip8.pc += 2; // Proceed to next opcode.
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Critical error: Program tried to perform illegal operation 0x" + (Chip8.opcode).ToString("X2"));
